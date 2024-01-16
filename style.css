@@ -63,6 +63,7 @@ section{
     text-align: center;
 }
 .characterContainer{
+  height: 100%;
   background-image: url('./Img/fondo-estrellado.png');
   background-repeat: no-repeat;
   background-size: cover;
