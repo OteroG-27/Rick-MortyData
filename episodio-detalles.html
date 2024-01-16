@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/bootstrap/bootstrap.min.css">
+  <script src="./js/bootstrap/bootstrap.bundle.min.js"></script>
+  <title>Detalles De Episodios</title>
+</head>
+<body>
+  <div class="container-fluid containerStart">
+    <div class="container">
+      <header class="header">
+        <div>
+          <img src="./Img/logo.png" alt="Logo Rick And Morty">
+        </div>
+        <nav class="menu">
+          <a href="./personajes.html">Personajes</a>
+          <a href="./planetas.html">Planetas</a>
+          <a href="./episodios.html">Episodios</a>
+        </nav>
+      </header>
+      <div class="row personajeDetalles" id="contenedorPersonajeDetalles"></div>
+    </div>
+  </div>
+  <div id="selectedCharacterId"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let episodeId = localStorage.getItem('id-episode');
+    let personajeDetalles = document.getElementById('contenedorPersonajeDetalles');
+    if (episodeId) {
+      fetch('https://rickandmortyapi.com/api/episode/' + episodeId)
+        .then(response => response.json())
+        .then(data => {
+          let characters = data.characters;
+          contenedorPersonajeDetalles.innerHTML = `
+            <div class="col-xl-6 col-sm-12 mb-4 text-center">
+              <img src="https://i0.wp.com/www.thewrap.com/wp-content/uploads/2023/10/rick-and-morty.jpg" width="100%" class="img-personajeDetalles" alt="${data.name}">
+            </div>
+            <div class="col-xl-6 col-sm-12">
+              <div class="detallesBox">
+                <h2><b>${data.name}</b></h2>
+                <div class="d-flex">
+                  <ul class="listaDeDatos me-2">
+                    <li><b>Air Date:</b> <p>${data.air_date}</p></li>
+                    <li><b>episode:</b> <p>${data.episode}</p></li>
+                    <li><b>Residentes:</b> <p>${characters.length}</p></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="detallesBox d-flex justify-content-around">
+                <img src="./Img/003-gun.png" alt="">
+                <img src="./Img/006-astrofisica.png" alt="">
+                <img src="./Img/003-neptuno.png" alt="">
+                <img src="./Img/002-space.png" alt="">
+              </div>
+            </div>
+          `;
+        })
+        .catch(error => console.error('Error:', error));
+    } else {
+      console.error('Error: No se proporcionó un ID de personaje en el localStorage.');
+    }
+  });
+</script>
+</body>
+</html>

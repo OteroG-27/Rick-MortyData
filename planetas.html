@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Rick & Morty</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <!-- <div id="root"></div> -->
+  <main class="characterContainer">
+    <header>
+      <div>
+        <img src="./Img/logo.png" alt="Logo Rick And Morty">
+      </div>
+      <nav class="menu">
+        <a href="./personajes.html">Personajes</a>
+        <a href="./planetas.html">Planetas</a>
+        <a href="./Episodios.html">Episodios</a>
+      </nav>
+    </header>
+    <section class="grid-item-center">
+      <img src="./Img/RickAndMorty.png" width="30%" class="logoPrincipal" alt="Logo Rick And Morty">
+      <form action="">
+        <div class="formM">
+          <input type="search" class="inputFilter" id="characterInput" placeholder="Filtrar por nombre..." oninput="buscarPlanet()">
+        </div>
+      </form>
+    </section>
+    <section class="mb-5">
+      <div class="sectionCharacter" id="containerPlanetas"></div>
+      <div class="row d-flex-between mb-5" id="pagination">
+        <button class="btn-Start" id="btnAnterior">Anterior</button>
+        <button class="btn-Start ms-3" id="learnMoreBtn"><img src="./Img/learMore.png" width="70%"
+            alt="lear More"></button>
+        <button class="btn-Start" id="btnSiguiente">Siguiente</button>
+      </div>
+    </section>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      let paginaActual = 1;
+
+      function actualizarPagina(numero) {
+        paginaActual = numero;
+        const url = `https://rickandmortyapi.com/api/location?page=${paginaActual}`;
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => displayPlanets(data.results.slice(0, 4)))
+          .catch((error) => console.error("Error fetching data:", error));
+      }
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch("https://rickandmortyapi.com/api/location/")
+          .then((response) => response.json())
+          .then((data) => displayplanets(data.results))
+          .catch((error) => console.error("Error fetching data:", error));
+      });
+      function displayPlanets(planets) {
+        const planetsDiv = document.getElementById("containerPlanetas");
+        planetsDiv.innerHTML = ""; 
+        planets.forEach((planet) => {
+          const planetDiv = document.createElement("div");
+          planetDiv.className = "character";
+          planetDiv.innerHTML = `
+            <div class="c-img">
+              <img src="https://i.ytimg.com/vi/UQQ6S9DxXBk/maxresdefault.jpg" style="height:150px" alt="${planet.name}">
+            </div>
+            <div class="c-info">
+              <button class="btnGO" value="${planet.id}">Go</button>
+              <h3>Name:</h3>
+              <p class="descripcion">${planet.name}</p>
+              <h3>Dimension:</h3>
+              <p class="descripcion">${planet.dimension}</p>
+            </div>
+          `;
+          planetsDiv.appendChild(planetDiv);
+          const learnMoreBtn = document.getElementById("learnMoreBtn");
+          learnMoreBtn.addEventListener("click", () => {
+            fetch(`https://rickandmortyapi.com/api/location?page=${paginaActual}`)
+              .then((response) => response.json())
+              .then((data) => displayPlanets(data.results))
+              .catch((error) =>
+                console.error("Error fetching additional data:", error)
+              );
+          });
+        });
+        document.getElementById("btnSiguiente").addEventListener("click", () => {
+          actualizarPagina(paginaActual + 1);
+        });
+        document.getElementById("btnAnterior").addEventListener("click", () => {
+          if (paginaActual > 1) {
+            actualizarPagina(paginaActual - 1);
+          }
+        });
+        var buttons = document.querySelectorAll(".btnGO");
+        var buttonsArray = Array.from(buttons);
+        buttonsArray.forEach(function (button) {
+          button.addEventListener("click", function () {
+            var planetId = button.value;
+            localStorage.setItem("id-planet", planetId);
+            window.location.href = "planeta-detalles.html";
+          });
+        });
+      }
+      actualizarPagina(paginaActual);
+    });
+
+    const buscarPlanet = async () => {
+      const nombrePlanet = document.getElementById('characterInput').value;
+      if (nombrePlanet.trim() === '') {
+        planetsDiv.innerHTML = '';
+        return;
+      }
+      const apiUrl = `https://rickandmortyapi.com/api/location/?name=${nombrePlanet}`;
+      try {
+        const response = await fetch(apiUrl);
+        const { results } = await response.json();
+        mostrarResultados(results);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+    const mostrarResultados = (resultados) => {
+      const planetDiv = document.getElementById('containerPlanetas');
+
+      if (resultados.length === 0) {
+        planetDiv.innerHTML = 'No se encontraron resultados.';
+      } else {
+        planetDiv.innerHTML = resultados.map(({ name, id, dimension }) => {
+          const resultHtml = `
+          <div class="characters">
+            <div class="c-img">
+              <img src="https://i.ytimg.com/vi/UQQ6S9DxXBk/maxresdefault.jpg" style="height:150px" alt="${name}">
+            </div>
+            <div class="c-info">
+              <button class="btnGO" value="${id}">Go</button>
+              <h3>Name:</h3>
+              <p class="descripcion">${name}</p>
+              <h3>Dimension:</h3>
+              <p class="descripcion">${dimension}</p>
+            </div>
+          </div>
+          `;
+          return resultHtml;
+        }).join('');
+        var buttons = document.querySelectorAll(".btnGO");
+        var buttonsArray = Array.from(buttons);
+        buttonsArray.forEach(function (button) {
+          button.addEventListener("click", function () {
+            var characterId = button.value;
+            localStorage.setItem("id", characterId);
+            window.location.href = "planeta-detalles.html";
+          });
+        });
+      }
+    };
+  </script>
+  <script src="main.js" type="module"></script>
+</body>
+</html>

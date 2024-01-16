@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Rick & Morty</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Krub:ital@1&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@1,500&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <main class="characterContainer">
+      <header>
+        <div>
+          <img src="./Img/logo.png" alt="Logo Rick And Morty">
+        </div>
+        <nav class="menu">
+          <a href="./personajes.html">Personajes</a>
+          <a href="./planetas.html">Planetas</a>
+          <a href="./episodios.html">Episodios</a>
+        </nav>
+      </header>
+      <section class="grid-item-center">
+        <img src="./Img/RickAndMorty.png" width="30%" class="logoPrincipal" alt="Logo Rick And Morty">
+        <form action="">
+          <div class="formM">
+            <input type="search" class="inputFilter" id="characterInput" placeholder="Filtrar por nombre..." oninput="buscarEpisode()">
+          </div>
+        </form>
+      </section>
+      <section>
+        <div class="sectionCharacter" id="containerEpisodes"></div>
+        <div class="sectionCharacter" id="resultados"></div>
+        <div class="row d-flex-between" id="pagination">
+            <button class="btn-Start" id="btnAnterior">Anterior</button>
+            <button class="btn-Start ms-3" id="learnMoreBtn"><img src="./Img/learMore.png" width="70%" alt="lear More"></button>
+            <button class="btn-Start" id="btnSiguiente">Siguiente</button>
+        </div>
+      </section>
+    </main>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+      let paginaActual = 1;
+      function actualizarPagina(numero) {
+        paginaActual = numero;
+        const url = `https://rickandmortyapi.com/api/episode?page=${paginaActual}`;
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => displayEpisodes(data.results.slice(0, 4)))
+          .catch((error) => console.error("Error fetching data:", error));
+      }
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch("https://rickandmortyapi.com/api/episode/")
+          .then((response) => response.json())
+          .then((data) => displayEpisodes(data.results))
+          .catch((error) => console.error("Error fetching data:", error));
+      });
+      function displayEpisodes(episodes) {
+        const episodesDiv = document.getElementById("containerEpisodes");
+        episodesDiv.innerHTML = ""; 
+        episodes.forEach((episode) => {
+          const episodeDiv = document.createElement("div");
+          episodeDiv.className = "character";
+          episodeDiv.innerHTML = `
+            <div class="c-img">
+              <img src="https://i0.wp.com/www.thewrap.com/wp-content/uploads/2023/10/rick-and-morty.jpg" style="height:150px" alt="${episode.name}">
+            </div>
+            <div class="c-info">
+              <button class="btnGO" value="${episode.id}">Go</button>
+              <h3>Name:</h3>
+              <p class="descripcion">${episode.name}</p>
+              <h3>Status:</h3>
+              <p class="descripcion">${episode.air_date}</p>
+            </div>
+          `;
+          episodesDiv.appendChild(episodeDiv);
+          const learnMoreBtn = document.getElementById("learnMoreBtn");
+          learnMoreBtn.addEventListener("click", () => {
+            fetch(`https://rickandmortyapi.com/api/episode?page=${paginaActual}`)
+              .then((response) => response.json())
+              .then((data) => displayEpisodes(data.results))
+              .catch((error) =>
+                console.error("Error fetching additional data:", error)
+              );
+          });
+
+        });
+        var buttons = document.querySelectorAll(".btnGO");
+        var buttonsArray = Array.from(buttons);
+        buttonsArray.forEach(function (button) {
+          button.addEventListener("click", function () {
+            var episodeId = button.value;
+            localStorage.setItem("id-episode", episodeId);
+            window.location.href = "episodio-detalles.html";
+          });
+        });
+        document.getElementById("btnSiguiente").addEventListener("click", () => {
+          actualizarPagina(paginaActual + 1);
+        });
+        document.getElementById("btnAnterior").addEventListener("click", () => {
+          if (paginaActual > 1) {
+            actualizarPagina(paginaActual - 1);
+          }
+        });
+      }
+      actualizarPagina(paginaActual);
+    });
+
+    const buscarEpisode = async () => {
+      const nombreEpisode = document.getElementById('characterInput').value;
+      if (nombreEpisode.trim() === '') {
+        episodesDiv.innerHTML = '';
+        return;
+      }
+      const apiUrl = `https://rickandmortyapi.com/api/episode/?name=${nombreEpisode}`;
+      try {
+        const response = await fetch(apiUrl);
+        const { results } = await response.json();
+        mostrarResultados(results);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+    const mostrarResultados = (resultados) => {
+      const episodeDiv = document.getElementById('containerEpisodes');
+
+      if (resultados.length === 0) {
+        episodeDiv.innerHTML = 'No se encontraron resultados.';
+      } else {
+        episodeDiv.innerHTML = resultados.map(({ name, id, air_date, episode, characters }) => {
+          const resultHtml = `
+          <div class="characters">
+            <div class="c-img">
+              <img src="https://i0.wp.com/www.thewrap.com/wp-content/uploads/2023/10/rick-and-morty.jpg" style="height:150px" alt="${name}">
+            </div>
+            <div class="c-info">
+              <button class="btnGO" value="${id}">Go</button>
+              <h3>Name:</h3>
+              <p class="descripcion">${name}</p>
+              <h3>Status:</h3>
+              <p class="descripcion">${air_date}</p>
+            </div>
+          </div>
+          `;
+          return resultHtml;
+        }).join('');
+        var buttons = document.querySelectorAll(".btnGO");
+        var buttonsArray = Array.from(buttons);
+        buttonsArray.forEach(function (button) {
+          button.addEventListener("click", function () {
+            var episodeId = button.value;
+            localStorage.setItem("id-episode", episodeId);
+            window.location.href = "episodio-detalles.html";
+          });
+        });
+      }
+    };
+    </script>
+    <script src="./data.js"></script>
+    <script src="main.js" type="module"></script>
+  </body>
+</html>
